@@ -15,7 +15,7 @@ Send a POST request:
 
 import argparse
 from http.server import HTTPServer, BaseHTTPRequestHandler
-
+import json
 
 class S(BaseHTTPRequestHandler):
     def _set_headers(self):
@@ -32,7 +32,9 @@ class S(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_headers()
-        self.wfile.write(self._html("hi!"))
+        data = {}
+        data['ID'] = 42
+        self.wfile.write(json.dumps(data).encode(encoding='utf_8'))
 
     def do_HEAD(self):
         self._set_headers()
