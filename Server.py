@@ -34,6 +34,7 @@ class S(BaseHTTPRequestHandler):
         self._set_headers()
         data = {}
         data['ID'] = 42
+        data['IPs'] = ['http://localhost:8000', 'http://localhost:8000']
         self.wfile.write(json.dumps(data).encode(encoding='utf_8'))
 
     def do_HEAD(self):
