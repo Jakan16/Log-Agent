@@ -45,7 +45,14 @@ class S(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
         post_data = self.rfile.read(content_length).decode('UTF-8') # <--- Gets the data itself
         print(post_data) # <-- Print post data
-        self._set_headers()
+        data = json.loads(post_data)
+        if 'codename' in data:
+            answer = {}
+            answer['IPs'] = ['http://localhost:8000', 'http://localhost:8000']
+            self._set_headers()
+            self.wfile.write(json.dumps(answer).encode(encoding='utf_8'))
+        else:
+            self._set_headers()
 
 
 def run(server_class=HTTPServer, handler_class=S, addr="localhost", port=8000):

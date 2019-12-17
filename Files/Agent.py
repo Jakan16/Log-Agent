@@ -11,28 +11,52 @@ import argparse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import random
 
+import sys
+
 #choose path where agent is
 mypath = os.path.dirname(os.path.realpath(__file__))
+
+print ("The script has the name %s" % (sys.argv[0]))
+print ("The company key is %s" % (sys.argv[1]))
+print ("The licence key is %s" % (sys.argv[2]))
+
+#save company key
+company = sys.argv[1]
+#save licence key
+licence = sys.argv[2]
+#save ports to send logs to, one port for each code
+ports = []
+for i in range(3,len(sys.argv)):
+    coderequest={}
+    coderequest['company'] = sys.argv[1]
+    coderequest['licence'] = sys.argv[2]
+    coderequest['codename'] = sys.argv[i]
+    r = requests.post('http://localhost:8000', data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
+    data = r._content
+    url = json.loads(data)
+    #if code not ready to recieve logs yet, wait
+    while url['IPs']== []:
+        time.sleep(10)
+        r = requests.post('http://localhost:8000', data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
+        data = r._content
+        url = json.loads(data)
+    #if multiple ports for one code, choose one randomly
+    IP = random.choice(url['IPs'])
+    #save all IPs in a list
+    ports.append(IP)
+
+#send GET request for token
+r = requests.get('http://localhost:8000?') #gets token subscription service
+data = r._content
+token = json.loads(data)
+ID = token['ID']
+print("Got ID " + str(token))
 
 #load in all files in current path
 uploaded_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f!='Agent.py' and f!='.DS_Store' ]
 
 #print to terminal which files is within the folder 
 print("Files in current folder is " + str(uploaded_files))
-
-#send GET request for token
-r = requests.get('http://localhost:8000') #gets token subscription service
-data = r._content
-token = json.loads(data)
-ID = token['ID']
-print("Got ID " + str(token))
-
-#send GET request for URL+port
-r = requests.get('http://localhost:8000') #gets from parser execute 
-data = r._content
-url = json.loads(data)
-IP = random.choice(url['IPs'])
-print("Got IP " + str(IP))
 
 #function that composes token, file_content and timestamp
 def post_content(file_name, token):
@@ -43,19 +67,23 @@ def post_content(file_name, token):
     data['agent'] = ID
     data['timestamp'] = current_milli_time
     data['log'] = file_content
-    r = requests.post(IP, data=json.dumps(data, ensure_ascii=False).encode('utf-8'))
+    #send logs to all codes chosen
+    for i in range(len(ports)):
+        r = requests.post(ports[i], data=json.dumps(data, ensure_ascii=False).encode('utf-8'))
 
 #data=json.dumps(data, ensure_ascii=False).encode('utf-8')
 #'http://18.185.149.38:7999/submitLog'
 
+#upload current files
 for i in uploaded_files:
     post_content(i,token)
 
-agent = True 
-
+#function to find new logs
 def Diff(li1, li2): 
     return (list(set(li1) - set(li2))) 
 
+#always run agent
+agent = True 
 while agent == True: 
     current_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f!='Agent.py' and f!='.DS_Store']
     if uploaded_files == current_files:
@@ -65,6 +93,5 @@ while agent == True:
         print(new_files)
         for i in new_files:
             post_content(i,token)
-        
         uploaded_files = current_files
 
