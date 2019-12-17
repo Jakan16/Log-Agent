@@ -51,6 +51,12 @@ class S(BaseHTTPRequestHandler):
             answer['IPs'] = ['http://localhost:8000', 'http://localhost:8000']
             self._set_headers()
             self.wfile.write(json.dumps(answer).encode(encoding='utf_8'))
+        elif 'company' in data:
+            answer = {}
+            answer['ID'] = 42
+            self._set_headers()
+            self.wfile.write(json.dumps(answer).encode(encoding='utf_8'))
+
         else:
             self._set_headers()
 

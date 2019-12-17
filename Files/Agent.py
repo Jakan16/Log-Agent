@@ -24,12 +24,22 @@ print ("The licence key is %s" % (sys.argv[2]))
 company = sys.argv[1]
 #save licence key
 licence = sys.argv[2]
+
+#send request for token
+costumer = {}
+costumer['company'] = company
+costumer['licence'] = licence
+r = requests.post('http://localhost:8000', data=json.dumps(costumer, ensure_ascii=False).encode('utf-8')) #gets token subscription service
+data = r._content
+token = json.loads(data)
+ID = token['ID']
+print("Got ID " + str(token))
+
 #save ports to send logs to, one port for each code
 ports = []
 for i in range(3,len(sys.argv)):
     coderequest={}
-    coderequest['company'] = sys.argv[1]
-    coderequest['licence'] = sys.argv[2]
+    coderequest['token'] = token
     coderequest['codename'] = sys.argv[i]
     r = requests.post('http://localhost:8000', data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
     data = r._content
@@ -44,13 +54,6 @@ for i in range(3,len(sys.argv)):
     IP = random.choice(url['IPs'])
     #save all IPs in a list
     ports.append(IP)
-
-#send GET request for token
-r = requests.get('http://localhost:8000?') #gets token subscription service
-data = r._content
-token = json.loads(data)
-ID = token['ID']
-print("Got ID " + str(token))
 
 #load in all files in current path
 uploaded_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f!='Agent.py' and f!='.DS_Store' ]
