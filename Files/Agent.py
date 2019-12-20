@@ -34,7 +34,7 @@ GET_PARSER_PATH = sys.argv[4]
 #send request for token
 customer = {}
 customer['method'] = "gettoken"
-customer['companypublic'] = company
+customer['companykey'] = company
 customer['licencekey'] = licence
 r = requests.post(AUTH_PATH, data=json.dumps(customer, ensure_ascii=False).encode('utf-8')) #gets token subscription service
 data = r._content
