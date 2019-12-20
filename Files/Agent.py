@@ -35,20 +35,23 @@ GET_PARSER_PATH = sys.argv[4]
 customer = {}
 customer['method'] = "gettoken"
 customer['companykey'] = company
-customer['licencekey'] = licence
+customer['licensekey'] = licence
 r = requests.post(AUTH_PATH, data=json.dumps(customer, ensure_ascii=False).encode('utf-8')) #gets token subscription service
 data = r._content
-token = json.loads(data)
-ID = token['ID']
-print("Got ID " + str(token))
+body = json.loads(data)
+token = body['token']
+print("Got ID " + str(body))
 
 #save ports to send logs to, one port for each code
 ports = []
 for i in range(5,len(sys.argv)):
+    print(sys.argv[i])
     coderequest={}
     coderequest['token'] = token
     coderequest['parser_name'] = sys.argv[i]
-    r = requests.post(GET_PARSER_PATH, data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
+    print(coderequest)
+    r = requests.post(GET_PARSER_PATH, json=coderequest)
+    print(r)
     data = r._content
     url = json.loads(data)
     #if code not ready to recieve logs yet, wait
@@ -74,12 +77,12 @@ def post_content(file_name, token):
     file_content = open_file.read()
     current_milli_time = int(round(time.time() * 1000))
     data = {}
-    data['agent'] = ID
+    data['authorization'] = token
     data['timestamp'] = current_milli_time
     data['log'] = file_content
     #send logs to all codes chosen
     for i in range(len(ports)):
-        r = requests.post(ports[i], data=json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        r = requests.post(("http://" + ports[i] + "/submitLog"), json=data)
 
 #data=json.dumps(data, ensure_ascii=False).encode('utf-8')
 #'http://18.185.149.38:7999/submitLog'
