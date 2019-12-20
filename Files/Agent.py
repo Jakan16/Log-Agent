@@ -19,17 +19,24 @@ mypath = os.path.dirname(os.path.realpath(__file__))
 print ("The script has the name %s" % (sys.argv[0]))
 print ("The company key is %s" % (sys.argv[1]))
 print ("The licence key is %s" % (sys.argv[2]))
+print ("The authentication path is %s" % (sys.argv[3]))
+print ("The parser path is %s" % (sys.argv[4]))
 
 #save company key
 company = sys.argv[1]
 #save licence key
 licence = sys.argv[2]
+#save auth path
+AUTH_PATH = sys.argv[3]
+#save parser path
+PARSER_PATH = sys.argv[4]
 
 #send request for token
-costumer = {}
-costumer['company'] = company
-costumer['licence'] = licence
-r = requests.post('http://localhost:8000', data=json.dumps(costumer, ensure_ascii=False).encode('utf-8')) #gets token subscription service
+customer = {}
+customer['method'] = "gettoken"
+customer['companypublic'] = company
+customer['licencekey'] = licence
+r = requests.post(AUTH_PATH, data=json.dumps(customer, ensure_ascii=False).encode('utf-8')) #gets token subscription service
 data = r._content
 token = json.loads(data)
 ID = token['ID']
@@ -37,17 +44,17 @@ print("Got ID " + str(token))
 
 #save ports to send logs to, one port for each code
 ports = []
-for i in range(3,len(sys.argv)):
+for i in range(5,len(sys.argv)):
     coderequest={}
     coderequest['token'] = token
     coderequest['codename'] = sys.argv[i]
-    r = requests.post('http://localhost:8000', data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
+    r = requests.post(PARSER_PATH, data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
     data = r._content
     url = json.loads(data)
     #if code not ready to recieve logs yet, wait
     while url['IPs']== []:
         time.sleep(10)
-        r = requests.post('http://localhost:8000', data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
+        r = requests.post(PARSR_PATH, data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
         data = r._content
         url = json.loads(data)
     #if multiple ports for one code, choose one randomly
