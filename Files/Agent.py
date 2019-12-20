@@ -20,7 +20,7 @@ print ("The script has the name %s" % (sys.argv[0]))
 print ("The company key is %s" % (sys.argv[1]))
 print ("The licence key is %s" % (sys.argv[2]))
 print ("The authentication path is %s" % (sys.argv[3]))
-print ("The parser path is %s" % (sys.argv[4]))
+print ("The get parser path is %s" % (sys.argv[4]))
 
 #save company key
 company = sys.argv[1]
@@ -29,7 +29,7 @@ licence = sys.argv[2]
 #save auth path
 AUTH_PATH = sys.argv[3]
 #save parser path
-PARSER_PATH = sys.argv[4]
+GET_PARSER_PATH = sys.argv[4]
 
 #send request for token
 customer = {}
@@ -47,14 +47,14 @@ ports = []
 for i in range(5,len(sys.argv)):
     coderequest={}
     coderequest['token'] = token
-    coderequest['codename'] = sys.argv[i]
-    r = requests.post(PARSER_PATH, data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
+    coderequest['parser_name'] = sys.argv[i]
+    r = requests.post(GET_PARSER_PATH, data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
     data = r._content
     url = json.loads(data)
     #if code not ready to recieve logs yet, wait
     while url['IPs']== []:
         time.sleep(10)
-        r = requests.post(PARSR_PATH, data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
+        r = requests.post(GET_PARSER_PATH, data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
         data = r._content
         url = json.loads(data)
     #if multiple ports for one code, choose one randomly
