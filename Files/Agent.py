@@ -57,7 +57,7 @@ for i in range(5,len(sys.argv)):
     #if code not ready to recieve logs yet, wait
     while url['IPs']== []:
         time.sleep(10)
-        r = requests.post(GET_PARSER_PATH, data=json.dumps(coderequest, ensure_ascii=False).encode('utf-8'))
+        r = requests.post(GET_PARSER_PATH, json=coderequest)
         data = r._content
         url = json.loads(data)
     #if multiple ports for one code, choose one randomly
