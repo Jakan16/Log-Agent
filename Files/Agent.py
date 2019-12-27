@@ -65,7 +65,7 @@ for i in range(5,len(sys.argv)):
     #save all IPs in a list
     ports.append(IP)
 
-#load in all files in current path
+#load in all files in current path (that is not itself and is not .DS_Store, which is a mac-thing)
 uploaded_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f!='Agent.py' and f!='.DS_Store' ]
 
 #print to terminal which files is within the folder 
@@ -97,6 +97,7 @@ def Diff(li1, li2):
 
 #always run agent
 agent = True 
+#continouesly send new logs
 while agent == True: 
     current_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) and f!='Agent.py' and f!='.DS_Store']
     if uploaded_files == current_files:
